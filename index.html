@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پینگ سنتر | سرورهای کاهش پینگ و پروکسی</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: Tahoma, sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen">
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center my-8 glass rounded-2xl p-6 shadow-2xl">
+            <h1 class="text-3xl font-bold text-cyan-400 mb-2">⚡️ پینگ سنتر | Ping Center</h1>
+            <p class="text-gray-400 text-sm mb-4">مرجع سرورهای پرسرعت کاهش پینگ و پروکسی (تست شده)</p>
+            <div class="flex justify-center gap-3 flex-wrap">
+                <button onclick="copySub()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-5 py-2.5 rounded-xl font-bold transition flex items-center gap-2">
+                    <i class="fa-solid fa-link"></i> کپی لینک ساب‌اسکریپشن
+                </button>
+                <a href="https://rubika.ir/ping_center_ir" target="_blank" class="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2.5 rounded-xl font-bold transition flex items-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> کانال روبیکا
+                </a>
+            </div>
+        </header>
+
+        <div class="flex justify-between items-center mb-6 px-2">
+            <span class="text-sm text-gray-400" id="count">در حال دریافت سرورها...</span>
+            <span class="text-xs bg-green-500/20 text-green-400 px-3 py-1 rounded-full border border-green-500/30">🟢 بروزرسانی زنده</span>
+        </div>
+
+        <div id="configs" class="space-y-4"></div>
+    </div>
+
+    <script>
+        const SUB_URL = 'sub.txt';
+
+        async function loadConfigs() {
+            try {
+                const response = await fetch(SUB_URL);
+                const data = await response.text();
+                const lines = data.split('\n').filter(line => line.trim() !== '');
+                
+                const container = document.getElementById('configs');
+                document.getElementById('count').innerText = `تعداد سرورهای فعال: ${lines.length}`;
+                container.innerHTML = '';
+
+                lines.reverse().forEach((conf) => {
+                    let proto = 'PROXY';
+                    if(conf.startsWith('vless://')) proto = 'VLESS';
+                    else if(conf.startsWith('vmess://')) proto = 'VMESS';
+                    else if(conf.startsWith('ss://')) proto = 'SHADOWSOCKS';
+                    else if(conf.startsWith('trojan://')) proto = 'TROJAN';
+
+                    const card = document.createElement('div');
+                    card.className = 'glass rounded-xl p-4 transition hover:border-cyan-500/50';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="bg-cyan-500/10 text-cyan-400 text-xs font-bold px-2.5 py-1 rounded-lg border border-cyan-500/20">#${proto}</span>
+                            <span class="text-xs text-gray-400">تست شده همراه اول / ایرانسل</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-3 rounded-lg font-mono text-xs text-slate-300 overflow-x-auto mb-3 dir-ltr text-left">
+                            ${conf.substring(0, 60)}...
+                        </div>
+                        <button onclick="copyToClipboard('${conf}')" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-sm py-2 rounded-lg font-medium transition flex items-center justify-center gap-2">
+                            <i class="fa-regular fa-copy"></i> کپی کد اتصال
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) {
+                document.getElementById('configs').innerHTML = '<p class="text-center text-red-400">در حال بروزرسانی سرورها...</p>';
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text);
+            alert('کد اتصال کپی شد!');
+        }
+
+        function copySub() {
+            navigator.clipboard.writeText(window.location.href + 'sub.txt');
+            alert('لینک ساب‌اسکریپشن کپی شد!');
+        }
+
+        loadConfigs();
+    </script>
+</body>
+</html>
